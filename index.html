@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Oks-Food Меню</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: linear-gradient(135deg, #f3e8df 0%, #f5efe6 45%, #d6efe2 100%);
+      color: #18181b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100dvh;
+      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+    }
+    .dish-card {
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="select-none">
+  <div class="w-full max-w-3xl mx-auto px-3 sm:px-6 pt-3 sm:pt-5">
+    <!-- Шапка -->
+    <header class="flex items-center justify-between gap-2 mb-3.5 sm:mb-5">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl glass-pill flex-shrink-0 flex items-center justify-center shadow-sm text-base sm:text-xl">
+          🥗
+        </div>
+        <div class="min-w-0">
+          <div class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-500">OKS-FOOD</div>
+          <div id="subtitle-text" class="text-xs sm:text-base font-extrabold text-zinc-900 leading-tight truncate">Здоровое питание</div>
+        </div>
+      </div>
+
+      <div class="flex flex-shrink-0 glass-pill rounded-full p-0.5 shadow-sm">
+        <button onclick="setLanguage('ru')" id="lang-ru" class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full bg-zinc-900 text-white transition">RU</button>
+        <button onclick="setLanguage('uz')" id="lang-uz" class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full text-zinc-700 transition">UZ</button>
+      </div>
+    </header>
+
+    <!-- Поиск -->
+    <div class="mb-4 sm:mb-5">
+      <div class="glass-pill rounded-2xl px-3.5 py-2.5 sm:py-3 flex items-center gap-2.5 shadow-sm">
+        <svg class="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input 
+          type="text" 
+          id="search-input" 
+          oninput="renderDishes()" 
+          placeholder="Поиск блюда..." 
+          class="bg-transparent w-full min-w-0 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none"
+        >
+      </div>
+    </div>
+
+    <!-- Тарифы -->
+    <div class="mb-4">
+      <h2 id="categories-title" class="text-sm sm:text-base font-extrabold text-zinc-900 mb-2">Тарифы</h2>
+      <div class="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+        <button onclick="changeProgram('Спорт')" id="btn-Спорт" class="prog-btn flex-shrink-0 py-2 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-full bg-zinc-900 text-white shadow-sm transition flex items-center gap-1.5">
+          <span>💪</span> <span class="btn-label">Спорт</span>
+        </button>
+        <button onclick="changeProgram('Баланс')" id="btn-Баланс" class="prog-btn flex-shrink-0 py-2 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-full glass-pill text-zinc-800 transition flex items-center gap-1.5">
+          <span>🥑</span> <span class="btn-label">Баланс</span>
+        </button>
+        <button onclick="changeProgram('Кето')" id="btn-Кето" class="prog-btn flex-shrink-0 py-2 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-full glass-pill text-zinc-800 transition flex items-center gap-1.5">
+          <span>🥩</span> <span class="btn-label">Кето</span>
+        </button>
+        <button onclick="changeProgram('Лечебный стол')" id="btn-Лечебный стол" class="prog-btn flex-shrink-0 py-2 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-full glass-pill text-zinc-800 transition flex items-center gap-1.5">
+          <span>🍵</span> <span class="btn-label">Лечебный стол</span>
+        </button>
+        <button onclick="changeProgram('Бизнес-ланч')" id="btn-Бизнес-ланч" class="prog-btn flex-shrink-0 py-2 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-full glass-pill text-zinc-800 transition flex items-center gap-1.5">
+          <span>💼</span> <span class="btn-label">Бизнес-ланч</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Карточка выбранного тарифа + кнопка Заказать -->
+    <div class="glass-pill rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-5 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span id="active-prog-icon" class="text-lg sm:text-xl flex-shrink-0">💪</span>
+          <h3 id="active-prog-title" class="text-base sm:text-lg font-extrabold text-zinc-900 truncate">Спорт</h3>
+        </div>
+        <span id="ration-badge" class="text-[11px] sm:text-xs font-semibold text-zinc-500 flex-shrink-0">Рацион на день</span>
+      </div>
+      <div class="text-[11px] sm:text-xs font-semibold text-zinc-700 leading-relaxed break-words" id="kbju-wrapper">
+        📊 <span id="text-kbju" class="text-emerald-700 font-bold">Загрузка...</span>
+      </div>
+      <button onclick="orderCurrentProgram()" id="program-order-btn" class="mt-3 w-full py-2.5 sm:py-3 px-4 rounded-xl bg-zinc-900 text-white text-xs sm:text-sm font-bold shadow-sm active:scale-[0.98] transition flex items-center justify-center gap-1.5">
+        Заказать тариф «Спорт»
+      </button>
+    </div>
+
+    <!-- Адаптивная сетка карточек блюд -->
+    <div class="grid grid-cols-1 min-[340px]:grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4" id="menu-container"></div>
+  </div>
+
+  <!-- Модальное окно просмотра блюда -->
+  <div id="dish-modal" onclick="closeModal(event)" class="fixed inset-0 bg-black/45 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all pb-[env(safe-area-inset-bottom)]" onclick="event.stopPropagation()">
+      <div class="relative">
+        <img id="modal-img" src="" alt="" class="w-full aspect-[16/11] max-h-64 object-cover">
+        <button onclick="hideModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/55 text-white flex items-center justify-center text-sm font-bold">✕</button>
+        <span id="modal-meal" class="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-zinc-900/85 text-white text-[11px] font-bold"></span>
+      </div>
+      <div class="p-4 sm:p-5">
+        <h4 id="modal-name" class="text-base sm:text-lg font-extrabold text-zinc-900 leading-snug mb-1"></h4>
+        <p id="modal-desc" class="text-sm font-bold text-emerald-700"></p>
+        <button onclick="orderSingleDishFromModal()" id="modal-order-btn" class="hidden mt-4 w-full py-3 rounded-2xl bg-zinc-900 text-white text-sm font-bold active:scale-[0.98] transition">
+          Заказать обед
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+const API_URL = "https://vanilla-advertisers-berlin-lee.trycloudflare.com/api/menu";
+
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    let currentLang = 'ru';
+    let currentProgram = 'Спорт';
+
+    const programIcons = {
+      "Спорт": "💪",
+      "Баланс": "🥑",
+      "Кето": "🥩",
+      "Лечебный стол": "🍵",
+      "Бизнес-ланч": "💼"
+    };
+
+    const uiTranslations = {
+      ru: {
+        subtitle: "Здоровое питание на каждый день",
+        searchPlaceholder: "Поиск блюда...",
+        categoriesTitle: "Тарифы",
+        rationBadge: "Рацион на день",
+        lunchBadge: "4 вида обеда на выбор",
+        orderProgramBtn: (name) => `Заказать тариф «${name}»`,
+        orderLunchMainBtn: "Заказать бизнес-ланч в Telegram",
+        modalOrderDishBtn: "Заказать этот обед",
+        emptySearch: "Блюда не найдены",
+        programs: {
+          "Спорт": "Спорт",
+          "Баланс": "Баланс",
+          "Кето": "Кето",
+          "Лечебный стол": "Лечебный стол",
+          "Бизнес-ланч": "Бизнес-ланч"
+        },
+        meals: {
+          "Завтрак": "Завтрак",
+          "Обед": "Обед",
+          "Перекус 1": "Перекус 1",
+          "Ужин": "Ужин",
+          "Перекус 2": "Перекус 2",
+          "Напиток дня": "Напиток дня",
+          "Обед 1": "Обед • Вариант 1",
+          "Обед 2": "Обед • Вариант 2",
+          "Обед 3": "Обед • Вариант 3",
+          "Обед 4": "Обед • Вариант 4"
+        }
+      },
+      uz: {
+        subtitle: "Har kunlik sog'lom ovqatlanish",
+        searchPlaceholder: "Taom qidirish...",
+        categoriesTitle: "Tariflar",
+        rationBadge: "Kunlik ratsion",
+        lunchBadge: "4 xil tushlik tanlovi",
+        orderProgramBtn: (name) => `«${name}» tarifini buyurtma qilish`,
+        orderLunchMainBtn: "Telegram orqali biznes-lanch buyurtma qilish",
+        modalOrderDishBtn: "Ushbu tushlikni buyurtma qilish",
+        emptySearch: "Taomlar topilmadi",
+        programs: {
+          "Спорт": "Sport",
+          "Баланс": "Balans",
+          "Кето": "Keto",
+          "Лечебный стол": "Shifobaxsh stol",
+          "Бизнес-ланч": "Biznes-lanch"
+        },
+        meals: {
+          "Завтрак": "Nonushta",
+          "Обед": "Tushlik",
+          "Перекус 1": "1-tamaddi",
+          "Ужин": "Kechki ovqat",
+          "Перекус 2": "2-tamaddi",
+          "Напиток дня": "Kun ichimligi",
+          "Обед 1": "Tushlik • 1-variant",
+          "Обед 2": "Tushlik • 2-variant",
+          "Обед 3": "Tushlik • 3-variant",
+          "Обед 4": "Tushlik • 4-variant"
+        }
+      }
+    };
+
+    const menusData = {
+      "Спорт": {
+        kbju: { ru: "1 850 ккал | Б: 140 г | Ж: 55 г | У: 180 г", uz: "1 850 kkal | O: 140 g | Y: 55 g | U: 180 g" },
+        dishes: [
+          {
+            meal: "Завтрак",
+            name: { ru: "Протеиновые панкейки с ягодами", uz: "Mevali proteinli pankeyklar" },
+            desc: { ru: "380 ккал", uz: "380 kkal" },
+            img: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед",
+            name: { ru: "Двойная куриная грудка с рисом", uz: "Guruchli ikki hissa tovuq filesi" },
+            desc: { ru: "580 ккал", uz: "580 kkal" },
+            img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 1",
+            name: { ru: "Творог с медом и орехами", uz: "Asal va yong'oqli tvorog" },
+            desc: { ru: "250 ккал", uz: "250 kkal" },
+            img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Ужин",
+            name: { ru: "Говяжий стейк с овощами гриль", uz: "Gril sabzavotli mol go'shti steyki" },
+            desc: { ru: "490 ккал", uz: "490 kkal" },
+            img: "https://images.unsplash.com/photo-1558030006-450675393462?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 2",
+            name: { ru: "Протеиновый батончик", uz: "Proteinli batonchik" },
+            desc: { ru: "150 ккал", uz: "150 kkal" },
+            img: "https://images.unsplash.com/photo-1622484214156-f004a74288ff?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Напиток дня",
+            name: { ru: "Протеиновый шейк", uz: "Proteinli sheyk" },
+            desc: { ru: "110 ккал", uz: "110 kkal" },
+            img: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=500&auto=format&fit=crop&q=60"
+          }
+        ]
+      },
+      "Баланс": {
+        kbju: { ru: "1 480 ккал | Б: 106 г | Ж: 45 г | У: 154 г", uz: "1 480 kkal | O: 106 g | Y: 45 g | U: 154 g" },
+        dishes: [
+          {
+            meal: "Завтрак",
+            name: { ru: "Овсяноблин с рикоттой и ягодами", uz: "Rikotta va mevali suli quymog'i" },
+            desc: { ru: "320 ккал", uz: "320 kkal" },
+            img: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед",
+            name: { ru: "Филе индейки с киноа и брокколи", uz: "Kinoa va brokkolili kurka filesi" },
+            desc: { ru: "460 ккал", uz: "460 kkal" },
+            img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 1",
+            name: { ru: "Творожный мусс с семенами чиа", uz: "Chia urug'li tvorogli muss" },
+            desc: { ru: "210 ккал", uz: "210 kkal" },
+            img: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Ужин",
+            name: { ru: "Стейк из лосося с печеными овощами", uz: "Pishirilgan sabzavotli losos steyki" },
+            desc: { ru: "410 ккал", uz: "410 kkal" },
+            img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 2",
+            name: { ru: "Зеленое яблоко и орехи", uz: "Yashil olma va yong'oqlar" },
+            desc: { ru: "140 ккал", uz: "140 kkal" },
+            img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Напиток дня",
+            name: { ru: "Зеленый детокс-смузи", uz: "Yashil detoks-smuzi" },
+            desc: { ru: "80 ккал", uz: "80 kkal" },
+            img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500&auto=format&fit=crop&q=60"
+          }
+        ]
+      },
+      "Кето": {
+        kbju: { ru: "1 600 ккал | Б: 90 г | Ж: 125 г | У: 20 г", uz: "1 600 kkal | O: 90 g | Y: 125 g | U: 20 g" },
+        dishes: [
+          {
+            meal: "Завтрак",
+            name: { ru: "Авокадо, бекон и яйца пашот", uz: "Avokado, bekon va pashtet tuxum" },
+            desc: { ru: "450 ккал", uz: "450 kkal" },
+            img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед",
+            name: { ru: "Свиная шейка со шпинатом в сливках", uz: "Qaymoqli ismaloq bilan go'sht" },
+            desc: { ru: "520 ккал", uz: "520 kkal" },
+            img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 1",
+            name: { ru: "Сыр бри и макадамия", uz: "Bri pishlog'i va makadamiya" },
+            desc: { ru: "250 ккал", uz: "250 kkal" },
+            img: "https://images.unsplash.com/photo-1452195100486-9cc805987862?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Ужин",
+            name: { ru: "Запеченная скумбрия с брокколи", uz: "Brokkoli bilan pishirilgan skumbriya" },
+            desc: { ru: "380 ккал", uz: "380 kkal" },
+            img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 2",
+            name: { ru: "Оливки и сыр сулугуни", uz: "Zaytun va suluguni pishlog'i" },
+            desc: { ru: "180 ккал", uz: "180 kkal" },
+            img: "https://images.unsplash.com/photo-1505576069267-0993d5f13d9d?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Напиток дня",
+            name: { ru: "Бронекофе с маслом кокоса", uz: "Kokos yog'li bronekofe" },
+            desc: { ru: "100 ккал", uz: "100 kkal" },
+            img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60"
+          }
+        ]
+      },
+      "Лечебный стол": {
+        kbju: { ru: "1 350 ккал | Б: 90 г | Ж: 40 г | У: 140 г", uz: "1 350 kkal | O: 90 g | Y: 40 g | U: 140 g" },
+        dishes: [
+          {
+            meal: "Завтрак",
+            name: { ru: "Паровой омлет на воде", uz: "Bug'da pishirilgan omlet" },
+            desc: { ru: "230 ккал", uz: "230 kkal" },
+            img: "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед",
+            name: { ru: "Суп-пюре овощной с индейкой", uz: "Kurka go'shtli sabzavotli pyure-sho'rva" },
+            desc: { ru: "380 ккал", uz: "380 kkal" },
+            img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 1",
+            name: { ru: "Творожная запеканка нежирная", uz: "Yog'siz tvorogli zapekanka" },
+            desc: { ru: "190 ккал", uz: "190 kkal" },
+            img: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Ужин",
+            name: { ru: "Минтай на пару с кабачками", uz: "Qovoqcha bilan bug'da pishirilgan baliq" },
+            desc: { ru: "310 ккал", uz: "310 kkal" },
+            img: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Перекус 2",
+            name: { ru: "Печеное яблоко без сахара", uz: "Shakarsiz pishirilgan olma" },
+            desc: { ru: "110 ккал", uz: "110 kkal" },
+            img: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Напиток дня",
+            name: { ru: "Отвар шиповника", uz: "Na'matak damlamasi" },
+            desc: { ru: "30 ккал", uz: "30 kkal" },
+            img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=60"
+          }
+        ]
+      },
+      "Бизнес-ланч": {
+        isSingleDishOrder: true,
+        kbju: { ru: "Сытный обед • Выберите любой из 4 вариантов", uz: "To'yimli tushlik • 4 variantdan birini tanlang" },
+        dishes: [
+          {
+            meal: "Обед 1",
+            name: { ru: "Куриное филе гриль с булгуром и салатом", uz: "Bulg'ur va salatli gril tovuq filesi" },
+            desc: { ru: "35 000 сум • 520 ккал", uz: "35 000 so'm • 520 kkal" },
+            img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед 2",
+            name: { ru: "Говяжьи медальоны с картофельным пюре", uz: "Kartoshka pyureli mol go'shti medalyonlari" },
+            desc: { ru: "42 000 сум • 610 ккал", uz: "42 000 so'm • 610 kkal" },
+            img: "https://images.unsplash.com/photo-1558030006-450675393462?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед 3",
+            name: { ru: "Паста с индейкой в сливочно-грибном соусе", uz: "Qaymoq-qo'ziqorinli sousda kurkali pasta" },
+            desc: { ru: "38 000 сум • 560 ккал", uz: "38 000 so'm • 560 kkal" },
+            img: "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=500&auto=format&fit=crop&q=60"
+          },
+          {
+            meal: "Обед 4",
+            name: { ru: "Запеченный лосось с рисом и овощами", uz: "Guruch va sabzavotli pishirilgan losos" },
+            desc: { ru: "48 000 сум • 540 ккал", uz: "48 000 so'm • 540 kkal" },
+            img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&auto=format&fit=crop&q=60"
+          }
+        ]
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('oks_lang', lang);
+
+      document.getElementById('lang-ru').className = lang === 'ru'
+        ? 'px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full bg-zinc-900 text-white transition'
+        : 'px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full text-zinc-700 transition';
+      document.getElementById('lang-uz').className = lang === 'uz'
+        ? 'px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full bg-zinc-900 text-white transition'
+        : 'px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full text-zinc-700 transition';
+
+      const t = uiTranslations[lang];
+      document.getElementById('subtitle-text').innerText = t.subtitle;
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('categories-title').innerText = t.categoriesTitle;
+      document.getElementById('modal-order-btn').innerText = t.modalOrderDishBtn;
+
+      Object.keys(t.programs).forEach(progKey => {
+        const btn = document.getElementById(`btn-${progKey}`);
+        if (btn) {
+          btn.querySelector('.btn-label').innerText = t.programs[progKey];
+        }
+      });
+
+      changeProgram(currentProgram);
+    }
+
+    function changeProgram(programName) {
+      currentProgram = programName;
+      document.querySelectorAll('.prog-btn').forEach(btn => {
+        btn.classList.remove('bg-zinc-900', 'text-white', 'shadow-sm');
+        btn.classList.add('glass-pill', 'text-zinc-800');
+      });
+      const activeBtn = document.getElementById(`btn-${programName}`);
+      activeBtn.classList.remove('glass-pill', 'text-zinc-800');
+      activeBtn.classList.add('bg-zinc-900', 'text-white', 'shadow-sm');
+
+      const data = menusData[programName];
+      const t = uiTranslations[currentLang];
+      const localizedProgName = t.programs[programName];
+      const isSingleDish = Boolean(data.isSingleDishOrder);
+
+      document.getElementById('active-prog-icon').innerText = programIcons[programName] || '🥗';
+      document.getElementById('active-prog-title').innerText = localizedProgName;
+      document.getElementById('ration-badge').innerText = isSingleDish ? t.lunchBadge : t.rationBadge;
+      document.getElementById('text-kbju').innerText = data.kbju[currentLang];
+
+      const programOrderBtn = document.getElementById('program-order-btn');
+      if (isSingleDish) {
+        programOrderBtn.classList.add('hidden');
+        tg.MainButton.text = t.orderLunchMainBtn;
+      } else {
+        programOrderBtn.classList.remove('hidden');
+        const orderText = t.orderProgramBtn(localizedProgName);
+        programOrderBtn.innerText = orderText;
+        tg.MainButton.text = orderText;
+      }
+
+      renderDishes();
+    }
+
+    function renderDishes() {
+      const data = menusData[currentProgram];
+      const t = uiTranslations[currentLang];
+      const isSingleDish = Boolean(data.isSingleDishOrder);
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
+
+      const filteredDishes = data.dishes.filter(item => {
+        const dishName = (typeof item.name === 'object' ? item.name[currentLang] : item.name).toLowerCase();
+        const mealLabel = (t.meals[item.meal] || item.meal).toLowerCase();
+        return dishName.includes(query) || mealLabel.includes(query);
+      });
+
+      if (filteredDishes.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-8 text-xs sm:text-sm font-semibold text-zinc-500">${t.emptySearch}</div>`;
+        return;
+      }
+
+      filteredDishes.forEach((item) => {
+        const mealLabel = t.meals[item.meal] || item.meal;
+        const dishName = typeof item.name === 'object' ? item.name[currentLang] : item.name;
+        const dishDesc = typeof item.desc === 'object' ? item.desc[currentLang] : item.desc;
+
+        const card = document.createElement('div');
+        card.className = "dish-card rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 flex flex-col justify-between min-w-0 transition active:scale-[0.98] cursor-pointer";
+        card.onclick = () => openModal(item.img, mealLabel, dishName, dishDesc, isSingleDish);
+
+        const bottomActionHtml = isSingleDish
+          ? `<div class="px-1 pb-0.5 flex items-center justify-between gap-1.5 min-w-0">
+               <span class="text-[11px] sm:text-xs font-extrabold text-emerald-700 leading-tight break-words">${dishDesc}</span>
+               <button type="button" onclick="orderSingleDish(event)" class="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-bold shadow-sm active:scale-90 transition">+</button>
+             </div>`
+          : `<div class="px-1 pb-1 min-w-0">
+               <span class="text-[11px] sm:text-xs font-extrabold text-emerald-700 break-words">${dishDesc}</span>
+             </div>`;
+
+        card.innerHTML = `
+          <div class="min-w-0">
+            <div class="relative mb-2">
+              <img src="${item.img}" alt="${dishName}" loading="lazy" class="w-full aspect-[4/3] rounded-xl sm:rounded-2xl object-cover">
+            </div>
+            <div class="px-1 min-w-0">
+              <div class="text-xs sm:text-sm font-extrabold text-zinc-900 leading-snug line-clamp-2 mb-0.5 break-words">${dishName}</div>
+              <div class="text-[10px] sm:text-[11px] font-medium text-zinc-500 mb-2 truncate">${mealLabel}</div>
+            </div>
+          </div>
+          ${bottomActionHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openModal(img, meal, name, desc, showOrderBtn) {
+      document.getElementById('modal-img').src = img;
+      document.getElementById('modal-meal').innerText = meal;
+      document.getElementById('modal-name').innerText = name;
+      document.getElementById('modal-desc').innerText = desc;
+
+      const modalOrderBtn = document.getElementById('modal-order-btn');
+      if (showOrderBtn) {
+        modalOrderBtn.classList.remove('hidden');
+      } else {
+        modalOrderBtn.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('dish-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function hideModal() {
+      const modal = document.getElementById('dish-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'dish-modal') hideModal();
+    }
+
+    function orderCurrentProgram() {
+      tg.openTelegramLink("https://t.me/Ermatov2012");
+    }
+
+    function orderSingleDish(e) {
+      e.stopPropagation();
+      tg.openTelegramLink("https://t.me/Ermatov2012");
+    }
+
+    function orderSingleDishFromModal() {
+      hideModal();
+      tg.openTelegramLink("https://t.me/Ermatov2012");
+    }
+
+    async function loadUpdatesFromServer() {
+      try {
+        const res = await fetch(API_URL, {
+          headers: { "ngrok-skip-browser-warning": "true" }
+        });
+        const data = await res.json();
+
+        if (data.dishes && Array.isArray(data.dishes)) {
+          data.dishes.forEach(updated => {
+            const prog = menusData[updated.program];
+            if (prog) {
+              const target = prog.dishes.find(d => d.meal === updated.meal);
+              if (target) {
+                target.name = { ru: updated.name, uz: updated.name };
+                target.desc = { ru: updated.desc, uz: updated.desc };
+                target.img = updated.img;
+              }
+            }
+          });
+          changeProgram(currentProgram);
+        }
+      } catch (e) {
+        console.log("Сервер недоступен, отображаем локальное меню:", e);
+      }
+    }
+
+    const savedLang = localStorage.getItem('oks_lang') || 'ru';
+    setLanguage(savedLang);
+    loadUpdatesFromServer();
+
+    tg.MainButton.textColor = "#ffffff";
+    tg.MainButton.color = "#18181b";
+    tg.MainButton.show();
+    tg.MainButton.onClick(() => {
+      orderCurrentProgram();
+    });
+  </script>
+</body>
+</html>
