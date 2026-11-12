@@ -48,7 +48,6 @@
 </head>
 <body class="select-none">
   <div class="w-full max-w-3xl mx-auto px-3 sm:px-6 pt-3 sm:pt-5">
-    <!-- Шапка -->
     <header class="flex items-center justify-between gap-2 mb-3.5 sm:mb-5">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl glass-pill flex-shrink-0 flex items-center justify-center shadow-sm text-base sm:text-xl">
@@ -66,7 +65,6 @@
       </div>
     </header>
 
-    <!-- Поиск -->
     <div class="mb-4 sm:mb-5">
       <div class="glass-pill rounded-2xl px-3.5 py-2.5 sm:py-3 flex items-center gap-2.5 shadow-sm">
         <svg class="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -83,7 +81,6 @@
       </div>
     </div>
 
-    <!-- Тарифы -->
     <div class="mb-4">
       <h2 id="categories-title" class="text-sm sm:text-base font-extrabold text-zinc-900 mb-2">Тарифы</h2>
       <div class="flex sm:flex-wrap gap-2 overflow-x-auto no-scrollbar pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
@@ -105,7 +102,6 @@
       </div>
     </div>
 
-    <!-- Карточка выбранного тарифа + кнопка Заказать -->
     <div class="glass-pill rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-5 shadow-sm">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div class="flex items-center gap-1.5 min-w-0">
@@ -122,11 +118,9 @@
       </button>
     </div>
 
-    <!-- Адаптивная сетка карточек блюд -->
     <div class="grid grid-cols-1 min-[340px]:grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4" id="menu-container"></div>
   </div>
 
-  <!-- Модальное окно просмотра блюда -->
   <div id="dish-modal" onclick="closeModal(event)" class="fixed inset-0 bg-black/45 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all pb-[env(safe-area-inset-bottom)]" onclick="event.stopPropagation()">
       <div class="relative">
@@ -145,7 +139,7 @@
   </div>
 
   <script>
-const API_URL = "https://vanilla-advertisers-berlin-lee.trycloudflare.com/api/menu";
+    const API_URL = "https://vanilla-advertisers-berlin-lee.trycloudflare.com/api/menu";
 
     const tg = window.Telegram.WebApp;
     tg.ready();
@@ -257,7 +251,7 @@ const API_URL = "https://vanilla-advertisers-berlin-lee.trycloudflare.com/api/me
             meal: "Перекус 2",
             name: { ru: "Протеиновый батончик", uz: "Proteinli batonchik" },
             desc: { ru: "150 ккал", uz: "150 kkal" },
-            img: "https://images.unsplash.com/photo-1622484214156-f004a74288ff?w=500&auto=format&fit=crop&q=60"
+            img: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=500&auto=format&fit=crop&q=60"
           },
           {
             meal: "Напиток дня",
@@ -591,8 +585,14 @@ const API_URL = "https://vanilla-advertisers-berlin-lee.trycloudflare.com/api/me
             if (prog) {
               const target = prog.dishes.find(d => d.meal === updated.meal);
               if (target) {
-                target.name = { ru: updated.name, uz: updated.name };
-                target.desc = { ru: updated.desc, uz: updated.desc };
+                target.name = {
+                  ru: updated.name_ru || updated.name,
+                  uz: updated.name_uz || updated.name_ru || updated.name
+                };
+                target.desc = {
+                  ru: updated.desc_ru || updated.desc,
+                  uz: updated.desc_uz || updated.desc_ru || updated.desc
+                };
                 target.img = updated.img;
               }
             }
