@@ -18,14 +18,17 @@
 </head>
 <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-slate-100 min-h-screen flex flex-col font-sans">
     
-    <!-- Шапка с крупным логотипом -->
-    <header class="p-6 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 text-center sticky top-0 z-20 shadow-xl flex flex-col items-center justify-center">
-        <!-- Логотип (картинка + текст) -->
+    <!-- Шапка с крупным логотипом и ссылкой на канал меню -->
+    <header class="p-5 bg-slate-900/85 backdrop-blur-md border-b border-slate-800 text-center sticky top-0 z-20 shadow-xl flex flex-col items-center justify-center">
         <div class="flex items-center gap-3 logo-glow mb-1">
             <img src="logo.png" alt="OKS-FOOD Logo" class="w-14 h-14 object-contain rounded-2xl border border-emerald-500/30 bg-slate-800 p-1 shadow-lg" onerror="this.style.display='none'">
             <h1 class="text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500">OKS-FOOD</h1>
         </div>
-        <p class="text-xs text-slate-400 tracking-wide">Премиальное сбалансированное питание с доставкой</p>
+        <p class="text-xs text-slate-400 tracking-wide mb-3">Премиальное сбалансированное питание с доставкой</p>
+        <a href="https://t.me/oks_fooduz" target="_blank" onclick="openChannel(event)" class="inline-flex items-center gap-2 text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-full transition">
+            <span>📢 Канал с меню (@oks_fooduz)</span>
+            <span>➔</span>
+        </a>
     </header>
 
     <!-- Основной контент -->
@@ -39,7 +42,7 @@
             </div>
         </div>
 
-        <!-- Шаг 2: Выбор калорийности (скрыт по умолчанию) -->
+        <!-- Шаг 2: Выбор калорийности -->
         <div id="tiers-section" class="hidden space-y-4">
             <div class="flex items-center justify-between bg-slate-800/90 border border-slate-700 p-4 rounded-2xl shadow-xl">
                 <div>
@@ -51,7 +54,7 @@
                 </button>
             </div>
 
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 px-1 pt-2">Выберите суточную калорийность:</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 px-1 pt-2">Выберите суточную калорийность и КБЖУ:</h3>
             <div id="tiers-container" class="space-y-3"></div>
         </div>
     </main>
@@ -63,12 +66,56 @@
                 <div class="text-[10px] text-slate-400 uppercase tracking-wider">Ваш выбор:</div>
                 <div id="selected-summary" class="font-bold text-emerald-400 text-xs truncate"></div>
             </div>
-            <button onclick="sendOrder()" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition transform active:scale-95 shrink-0 flex items-center gap-2">
+            <button onclick="openOrderModal()" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition transform active:scale-95 shrink-0 flex items-center gap-2">
                 <span>Заказать</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
             </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно формы заказа -->
+    <div id="order-modal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Оформление заказа</h3>
+                    <p id="modal-tariff-info" class="text-xs text-emerald-400 font-medium"></p>
+                </div>
+                <button onclick="closeOrderModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+            </div>
+
+            <form id="order-form" onsubmit="submitOrderForm(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">1. Имя и фамилия *</label>
+                    <input type="text" id="cust-name" required placeholder="Например: Алишер Каримов" class="w-full bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">2. Номер телефона *</label>
+                    <input type="tel" id="cust-phone" required placeholder="+998 90 123 45 67" class="w-full bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">3. Точный адрес *</label>
+                    <input type="text" id="cust-address" required placeholder="Район, улица, дом, квартира, ориентир" class="w-full bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">4. Геолокация *</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="cust-geo" required placeholder="Ссылка на карту или нажмите кнопку ➔" class="flex-1 bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition">
+                        <button type="button" id="geo-btn" onclick="detectLocation()" class="bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-400 px-3 py-2.5 rounded-xl text-xs font-semibold shrink-0 transition">
+                            📍 Моя гео
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-2 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black py-3.5 rounded-2xl shadow-lg shadow-emerald-500/20 transition transform active:scale-95">
+                    Отправить менеджеру 🚀
+                </button>
+            </form>
         </div>
     </div>
 
@@ -80,6 +127,72 @@
 
         const BACKEND_URL = "https://muhammadali123.pythonanywhere.com";
         const MANAGER_USERNAME = "OKSFOOD_manager";
+        const CHANNEL_URL = "https://t.me/oks_fooduz";
+
+        // Таблица КБЖУ по программам и калорийностям
+        const KBJU_MAP = {
+            "Баланс": {
+                "800 ккал": "Б: 35–45 г • Ж: 25–30 г • У: 90–105 г",
+                "700 - 800": "Б: 35–45 г • Ж: 25–30 г • У: 90–105 г",
+                "1000 ккал": "Б: 45–55 г • Ж: 30–35 г • У: 110–130 г",
+                "900 - 1000": "Б: 45–55 г • Ж: 30–35 г • У: 110–130 г",
+                "1200 ккал": "Б: 55–65 г • Ж: 35–45 г • У: 135–155 г",
+                "1100 - 1200": "Б: 55–65 г • Ж: 35–45 г • У: 135–155 г",
+                "1200 - 1300": "Б: 55–65 г • Ж: 35–45 г • У: 135–155 г",
+                "1600 ккал": "Б: 75–90 г • Ж: 45–55 г • У: 180–205 г",
+                "1500 - 1600": "Б: 75–90 г • Ж: 45–55 г • У: 180–205 г",
+                "2000 ккал": "Б: 95–110 г • Ж: 55–70 г • У: 225–255 г",
+                "1800 - 2000": "Б: 95–110 г • Ж: 55–70 г • У: 225–255 г",
+                "2000 - 2100": "Б: 95–110 г • Ж: 55–70 г • У: 225–255 г",
+                "2500 ккал": "Б: 115–135 г • Ж: 70–85 г • У: 280–320 г",
+                "2500 - 2600": "Б: 115–135 г • Ж: 70–85 г • У: 280–320 г"
+            },
+            "Кето": {
+                "800 ккал": "Б: 40–50 г • Ж: 55–65 г • У: 10–15 г",
+                "700 - 800": "Б: 40–50 г • Ж: 55–65 г • У: 10–15 г",
+                "1000 ккал": "Б: 50–60 г • Ж: 70–80 г • У: 10–20 г",
+                "900 - 1000": "Б: 50–60 г • Ж: 70–80 г • У: 10–20 г",
+                "1200 ккал": "Б: 60–75 г • Ж: 80–100 г • У: 15–20 г",
+                "1100 - 1200": "Б: 60–75 г • Ж: 80–100 г • У: 15–20 г",
+                "1200 - 1300": "Б: 60–75 г • Ж: 80–100 г • У: 15–20 г",
+                "1600 ккал": "Б: 85–105 г • Ж: 110–130 г • У: 20–30 г",
+                "1500 - 1600": "Б: 85–105 г • Ж: 110–130 г • У: 20–30 г",
+                "2000 ккал": "Б: 105–130 г • Ж: 140–165 г • У: 25–35 г",
+                "1800 - 2000": "Б: 105–130 г • Ж: 140–165 г • У: 25–35 г",
+                "2000 - 2100": "Б: 105–130 г • Ж: 140–165 г • У: 25–35 г",
+                "2500 ккал": "Б: 130–155 г • Ж: 175–205 г • У: 30–40 г",
+                "2500 - 2600": "Б: 130–155 г • Ж: 175–205 г • У: 30–40 г"
+            },
+            "Спорт": {
+                "800 ккал": "Б: 40–50 г • Ж: 20–25 г • У: 90–105 г",
+                "700 - 800": "Б: 40–50 г • Ж: 20–25 г • У: 90–105 г",
+                "1000 ккал": "Б: 50–65 г • Ж: 25–30 г • У: 110–130 г",
+                "900 - 1000": "Б: 50–65 г • Ж: 25–30 г • У: 110–130 г",
+                "1200 ккал": "Б: 65–80 г • Ж: 30–35 г • У: 135–155 г",
+                "1100 - 1200": "Б: 65–80 г • Ж: 30–35 г • У: 135–155 г",
+                "1200 - 1300": "Б: 65–80 г • Ж: 30–35 г • У: 135–155 г",
+                "1600 ккал": "Б: 90–110 г • Ж: 40–50 г • У: 180–205 г",
+                "1500 - 1600": "Б: 90–110 г • Ж: 40–50 г • У: 180–205 г",
+                "2000 ккал": "Б: 115–135 г • Ж: 50–65 г • У: 225–255 г",
+                "1800 - 2000": "Б: 115–135 г • Ж: 50–65 г • У: 225–255 г",
+                "2000 - 2100": "Б: 115–135 г • Ж: 50–65 г • У: 225–255 г",
+                "2500 ккал": "Б: 140–165 г • Ж: 65–80 г • У: 280–320 г",
+                "2500 - 2600": "Б: 140–165 г • Ж: 65–80 г • У: 280–320 г"
+            }
+        };
+
+        function getKbju(programTitle, kcalValue) {
+            const cleanKcal = String(kcalValue || "").replace(/ккал/gi, "").trim();
+            const progMap = KBJU_MAP[programTitle] || KBJU_MAP[programTitle?.split(" ")[0]] || {};
+            return progMap[kcalValue] || progMap[cleanKcal] || "";
+        }
+
+        function openChannel(event) {
+            if (tg && tg.openTelegramLink) {
+                event.preventDefault();
+                tg.openTelegramLink(CHANNEL_URL);
+            }
+        }
 
         let menuData = [];
         let selectedProgram = null;
@@ -132,24 +245,26 @@
             container.innerHTML = '';
 
             selectedProgram.tiers.forEach(tier => {
+                const kbjuText = getKbju(selectedProgram.title_ru, tier.kcal);
                 const btn = document.createElement('button');
-                btn.className = "w-full text-left bg-slate-900/80 hover:bg-slate-800 p-4 rounded-2xl flex justify-between items-center transition-all border border-slate-800 hover:border-emerald-500/40 shadow-md group";
-                btn.onclick = () => selectTier(tier, btn);
+                btn.className = "w-full text-left bg-slate-900/80 hover:bg-slate-800 p-4 rounded-2xl flex justify-between items-center gap-3 transition-all border border-slate-800 hover:border-emerald-500/40 shadow-md group";
+                btn.onclick = () => selectTier(tier, kbjuText, btn);
                 btn.innerHTML = `
                     <div>
-                        <div class="text-xs text-slate-400 uppercase tracking-wider">Калорийность</div>
+                        <div class="text-[11px] text-slate-400 uppercase tracking-wider">Калорийность</div>
                         <div class="font-bold text-white text-base mt-0.5 group-hover:text-emerald-400 transition">🔥 ${tier.kcal}</div>
+                        ${kbjuText ? `<div class="text-[11px] text-teal-300/90 mt-1 font-medium">${kbjuText}</div>` : ''}
                     </div>
-                    <div class="text-right">
-                        <div class="text-xs text-slate-400 uppercase tracking-wider">Цена за день</div>
-                        <div class="text-emerald-400 font-extrabold text-base">${tier.price}</div>
+                    <div class="text-right shrink-0">
+                        <div class="text-[11px] text-slate-400 uppercase tracking-wider">Цена за день</div>
+                        <div class="text-emerald-400 font-extrabold text-base mt-0.5">${tier.price}</div>
                     </div>
                 `;
                 container.appendChild(btn);
             });
         }
 
-        function selectTier(tier, btnElement) {
+        function selectTier(tier, kbjuText, btnElement) {
             document.querySelectorAll('#tiers-container button').forEach(b => {
                 b.classList.remove('border-emerald-500', 'bg-slate-800', 'shadow-emerald-500/10');
                 b.classList.add('border-slate-800', 'bg-slate-900/80');
@@ -157,7 +272,7 @@
             btnElement.classList.remove('border-slate-800', 'bg-slate-900/80');
             btnElement.classList.add('border-emerald-500', 'bg-slate-800', 'shadow-emerald-500/10');
             
-            selectedTier = tier;
+            selectedTier = { ...tier, kbju: kbjuText };
 
             document.getElementById('selected-summary').innerText = `${selectedProgram.title_ru} | ${tier.kcal} — ${tier.price}`;
             document.getElementById('order-bar').classList.remove('hidden');
@@ -171,13 +286,77 @@
             document.getElementById('order-bar').classList.add('hidden');
         }
 
-        function sendOrder() {
+        function openOrderModal() {
+            if (!selectedProgram || !selectedTier) return;
+            document.getElementById('modal-tariff-info').innerText = `${selectedProgram.title_ru} • ${selectedTier.kcal} (${selectedTier.price})`;
+            
+            const user = tg?.initDataUnsafe?.user;
+            const nameInput = document.getElementById('cust-name');
+            if (user && !nameInput.value) {
+                nameInput.value = [user.first_name, user.last_name].filter(Boolean).join(' ');
+            }
+
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        function detectLocation() {
+            const btn = document.getElementById('geo-btn');
+            const geoInput = document.getElementById('cust-geo');
+            
+            if (!navigator.geolocation) {
+                alert('Геолокация не поддерживается вашим устройством. Вставьте ссылку вручную.');
+                return;
+            }
+
+            btn.innerText = '⏳ Поиск...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude.toFixed(6);
+                    const lon = pos.coords.longitude.toFixed(6);
+                    geoInput.value = `https://maps.google.com/?q=${lat},${lon}`;
+                    btn.innerText = '✅ Готово';
+                    btn.disabled = false;
+                },
+                (err) => {
+                    alert('Не удалось получить доступ к GPS. Разрешите доступ к геопозиции в настройках или вставьте ссылку на карту вручную.');
+                    btn.innerText = '📍 Моя гео';
+                    btn.disabled = false;
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        function submitOrderForm(event) {
+            event.preventDefault();
             if (!selectedProgram || !selectedTier) return;
 
-            const text = `Здравствуйте! Хочу сделать заказ:\n\n📦 Тариф: ${selectedProgram.title_ru}\n🔥 Калорийность: ${selectedTier.kcal}\n💰 Цена: ${selectedTier.price}\n\nхочу узнать меню выбранного мною тарифа`;
-            
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const geo = document.getElementById('cust-geo').value.trim();
+            const kbjuLine = selectedTier.kbju ? `\n📊 КБЖУ: ${selectedTier.kbju}` : '';
+
+            const text = 
+                `Здравствуйте! Хочу сделать заказ:\n\n` +
+                `📦 Тариф: ${selectedProgram.title_ru}\n` +
+                `🔥 Калорийность: ${selectedTier.kcal}${kbjuLine}\n` +
+                `💰 Цена: ${selectedTier.price}\n\n` +
+                `👤 Имя и фамилия: ${name}\n` +
+                `📞 Телефон: ${phone}\n` +
+                `🏠 Точный адрес: ${address}\n` +
+                `📍 Геолокация: ${geo}\n\n` +
+                `хочу узнать меню выбранного мною тарифа`;
+
             const url = `https://t.me/${MANAGER_USERNAME}?text=${encodeURIComponent(text)}`;
             
+            closeOrderModal();
+
             if (tg && tg.openTelegramLink) {
                 tg.openTelegramLink(url);
             } else {
